@@ -11,20 +11,27 @@
     <!--    页面主题区域-->
     <el-container>
       <!--      侧边栏-->
-      <el-aside width="200px">
+      <el-aside :width="isCollapse?'64px':'200px'">
+        <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!--        侧边栏菜单-->
         <el-menu
           background-color="#333774"
           text-color="#fff"
-          active-text-color="#40 9EFF">
+          active-text-color="#409EFF"
+          :default-active="activePath"
+          :router="true"
+          :collapse-transition="false"
+          :collapse="isCollapse"
+          :unique-opened='true'>
           <!--          一级菜单-->
           <el-submenu :index="item.id+''" v-for="item in menuList" :key="item.id">
             <!--            一级菜单的模板区域-->
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i :class="iconObj[item.id]"></i>
               <span>{{item.authName}}</span>
             </template>
-            <el-menu-item :index="subItem.id+''" v-for="subItem in item.children" :key="subItem.id">
+            <el-menu-item :index="'/'+subItem.path" v-for="subItem in item.children" :key="subItem.id"
+                          @click="saveMenuActive('/'+subItem.path)">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>{{subItem.authName}}</span>
@@ -48,7 +55,9 @@
       </el-aside>
       <el-container>
         <!--        右侧内容-->
-        <el-main>Main</el-main>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
         <!--        <el-footer>Footer</el-footer>-->
       </el-container>
     </el-container>
@@ -62,12 +71,19 @@
         menuList: [],
         iconObj: {
           125: 'iconfont icon-user',
-          103: 'iconfont icon-tijikongjian'
-        }
+          103: 'iconfont icon-tijikongjian',
+          101: 'iconfont icon-shangpin',
+          102: 'iconfont icon-danju',
+          145: 'iconfont icon-baobiao'
+        },
+        isCollapse: false,
+        // 被激活的菜单
+        activePath: ''
       }
     },
     created () {
       this.getMenuList()
+      this.activePath = window.sessionStorage.getItem('activePath')
     },
     methods: {
       logout () {
@@ -78,7 +94,15 @@
         const { data: res } = await this.$http.get('menus')
         if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
         this.menuList = res.data
-        console.log(this.menuList)
+      },
+      // 折叠侧边栏
+      toggleCollapse () {
+        this.isCollapse = !this.isCollapse
+      },
+      // 选定菜单高亮
+      saveMenuActive (path) {
+        window.sessionStorage.setItem('activePath', path)
+        this.activePath = path
       }
     },
     name: 'Home'
@@ -113,9 +137,29 @@
 
   .el-aside {
     background-color: #333774;
+
+    .el-menu {
+      /*右侧边框线突出问题*/
+      border-right: solid 0px;
+    }
   }
 
   .el-main {
     background-color: #eaedf1;
+  }
+
+  .iconfont {
+    /*图标与文字间距太近*/
+    margin-right: 10px;
+  }
+
+  .toggle-button {
+    background-color: #4A5064;
+    font-size: 10px;
+    line-height: 24px;
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: 0.2em;
+    cursor: pointer;
   }
 </style>

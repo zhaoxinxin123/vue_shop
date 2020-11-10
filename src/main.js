@@ -4,6 +4,7 @@ import router from './router'
 // import store from './store'
 import './plugins/element.js'
 // 全局样式  // 导入字体图标
+import './assets/fonts/iconfont.css'
 import './assets/css/global.css'
 import axios from 'axios'
 // 配置请求根路径
